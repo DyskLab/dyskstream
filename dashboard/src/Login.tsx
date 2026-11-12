@@ -12,10 +12,10 @@ registerDict({
     "Password is set via {a} in {b} (default: admin).",
 });
 
-export function Login({ onSuccess }: { onSuccess: () => void }) {
+export function Login({ onSuccess, notice }: { onSuccess: () => void; notice?: string | null }) {
   const { t } = useLang();
   const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(notice ?? null);
   const [busy, setBusy] = useState(false);
 
   async function submit() {

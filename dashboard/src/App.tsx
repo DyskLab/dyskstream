@@ -5,6 +5,18 @@ import { useWs } from "./useWs";
 import { useLang, registerDict } from "./i18n";
 import { Login } from "./Login";
 import { Button } from "./components/ui";
+import { PairModal } from "./components/PairModal";
+
+// Dibuka dari QR (…/?pair=KODE): tukar kode jadi token SEKALI di level modul.
+// Di dalam useEffect, StrictMode memanggilnya dua kali dan kode sekali-pakai hangus.
+const pairCode = new URLSearchParams(location.search).get("pair");
+if (pairCode) history.replaceState(null, "", location.pathname + location.hash);
+const pairing: Promise<string | null> | null = pairCode
+  ? api.redeemPair(pairCode).then(
+      () => null,
+      (e: unknown) => (e instanceof Error ? e.message : "kode QR tidak valid"),
+    )
+  : null;
 
 registerDict({
   "📡 Monitor": "📡 Monitor",
@@ -22,6 +34,8 @@ registerDict({
   TERPUTUS: "DISCONNECTED",
   "🔓 Logout": "🔓 Logout",
   "Memuat…": "Loading…",
+  "📱 Buka di HP": "📱 Open on phone",
+  "kode QR tidak valid": "invalid QR code",
 });
 import { MonitorTab } from "./tabs/MonitorTab";
 import { LeaderboardTab } from "./tabs/LeaderboardTab";
@@ -126,17 +140,31 @@ export function App() {
     }
   }, []);
 
-  // Cek sesi saat mount.
+  const [pairError, setPairError] = useState<string | null>(null);
+  const [showPair, setShowPair] = useState(false);
+
+  // Cek sesi saat mount (tunggu dulu penukaran kode QR kalau ada).
   useEffect(() => {
     setUnauthHandler(() => setAuthed(false));
-    if (!getToken()) {
-      setAuthed(false);
-      return;
-    }
-    api
-      .check()
-      .then(() => setAuthed(true))
-      .catch(() => setAuthed(false));
+    let cancelled = false;
+    (async () => {
+      if (pairing) {
+        const err = await pairing;
+        if (cancelled) return;
+        if (err) setPairError(err);
+      }
+      if (!getToken()) {
+        setAuthed(false);
+        return;
+      }
+      api
+        .check()
+        .then(() => !cancelled && setAuthed(true))
+        .catch(() => !cancelled && setAuthed(false));
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   // Muat data awal setelah terautentikasi.
@@ -155,7 +183,7 @@ export function App() {
     return <div className="min-h-screen grid place-items-center font-black uppercase">{t("Memuat…")}</div>;
   }
   if (!authed) {
-    return <Login onSuccess={() => setAuthed(true)} />;
+    return <Login onSuccess={() => setAuthed(true)} notice={pairError} />;
   }
 
   return (
@@ -192,6 +220,9 @@ export function App() {
               </button>
             ))}
           </div>
+          <Button color="cyan" className="!px-3 !py-1 text-xs" onClick={() => setShowPair(true)}>
+            {t("📱 Buka di HP")}
+          </Button>
           <Button color="white" className="!px-3 !py-1 text-xs" onClick={logout}>
             {t("🔓 Logout")}
           </Button>
@@ -225,6 +256,7 @@ export function App() {
       {tab === "stats" && <StatsTab />}
       {tab === "history" && <HistoryTab />}
       {tab === "help" && <HelpTab />}
+      {showPair && <PairModal onClose={() => setShowPair(false)} />}
     </div>
   );
 }

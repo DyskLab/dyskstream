@@ -82,6 +82,20 @@ export const api = {
     const body = (await res.json()) as { token: string };
     setToken(body.token);
   },
+  /** HP: tukar kode dari QR jadi token sesi (tanpa password). */
+  redeemPair: async (code: string): Promise<void> => {
+    const res = await fetch("/api/auth/pair/redeem", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code }),
+    });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(body?.error ?? "kode QR tidak valid");
+    setToken((body as { token: string }).token);
+  },
+  /** PC: minta kode pairing + daftar IP LAN untuk ditampilkan sebagai QR. */
+  createPair: () =>
+    req<{ code: string; expiresAt: number; addresses: string[] }>("/api/auth/pair", { method: "POST" }),
   check: () => req<{ ok: boolean }>("/api/auth/check"),
   logout: async () => {
     try {

@@ -54,12 +54,12 @@ const app = Fastify({
 const db = getDb();
 const auth = new Auth(db, config.adminPassword);
 
-// Guard: semua /api butuh token, KECUALI login.
+// Guard: semua /api butuh token, KECUALI login & tukar kode QR.
 // Overlay, /nb (Nightbot), /uploads, /ws, /health tetap publik.
 app.addHook("onRequest", async (req, reply) => {
   const path = req.url.split("?")[0];
   if (!path.startsWith("/api/")) return;
-  if (path === "/api/auth/login") return;
+  if (path === "/api/auth/login" || path === "/api/auth/pair/redeem") return;
   if (!auth.valid(bearer(req.headers.authorization))) {
     return reply.code(401).send({ error: "unauthorized" });
   }

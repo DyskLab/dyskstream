@@ -15,6 +15,8 @@ export default defineConfig({
   },
   server: {
     port: 4301,
+    // Dengarkan di LAN supaya QR "Buka di HP" bisa dipakai juga saat dev.
+    host: true,
     fs: { allow: [".", "../shared"] },
     proxy: {
       "/api": BACKEND,

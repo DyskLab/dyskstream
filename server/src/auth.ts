@@ -4,6 +4,8 @@ import { randomUUID, timingSafeEqual } from "node:crypto";
 import type { DatabaseSync } from "node:sqlite";
 
 const THIRTY_DAYS = 30 * 24 * 60 * 60 * 1000;
+/** Umur kode pairing QR (login dari HP). Pendek karena QR = kunci masuk. */
+export const PAIR_TTL_MS = 2 * 60 * 1000;
 
 function safeEqual(a: string, b: string): boolean {
   const ba = Buffer.from(a);
@@ -14,6 +16,8 @@ function safeEqual(a: string, b: string): boolean {
 
 export class Auth {
   private tokens = new Set<string>();
+  /** Kode pairing sekali pakai → waktu kedaluwarsa. Sengaja di memori saja. */
+  private pairCodes = new Map<string, number>();
 
   constructor(
     private readonly db: DatabaseSync,
@@ -32,6 +36,28 @@ export class Auth {
   /** Verifikasi password → keluarkan token, atau null bila salah. */
   login(password: string): string | null {
     if (!safeEqual(password, this.password)) return null;
+    return this.issue();
+  }
+
+  /** Buat kode pairing untuk QR (hanya dipanggil oleh admin yang sudah login). */
+  createPairCode(now = Date.now()): { code: string; expiresAt: number } {
+    for (const [c, exp] of this.pairCodes) if (exp <= now) this.pairCodes.delete(c);
+    const code = randomUUID().replace(/-/g, "");
+    const expiresAt = now + PAIR_TTL_MS;
+    this.pairCodes.set(code, expiresAt);
+    return { code, expiresAt };
+  }
+
+  /** Tukar kode pairing → token sesi. Kode langsung hangus (sekali pakai). */
+  redeemPairCode(code: string, now = Date.now()): string | null {
+    const exp = this.pairCodes.get(code);
+    if (exp === undefined) return null;
+    this.pairCodes.delete(code);
+    if (exp <= now) return null;
+    return this.issue();
+  }
+
+  private issue(): string {
     const token = `${randomUUID()}${randomUUID()}`.replace(/-/g, "");
     this.tokens.add(token);
     this.db

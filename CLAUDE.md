@@ -53,7 +53,7 @@ Step 4's guard is the last line of defense against a command string existing in 
 
 **Database** (`server/src/db/`): `migrate.ts` holds the `SCHEMA` string, an `ensureColumn(db, table, col, ddl)` helper, and `DEFAULT_SETTINGS`. Repos in `server/src/db/repo/*` wrap tables (`viewers`, `point_ledger`, `redemptions`, `alert_templates`, `settings`, `rewards`, `reward_claims`, `giveaway_winners`, `sounds`, `stream_sessions`, `sessions`). Points are scoped per `(host_channel_id × author_channel_id)`.
 
-**Auth** (`server/src/auth.ts`, `routes/auth.ts`): password login (`ADMIN_PASSWORD`, default `admin`), bearer tokens persisted in the `sessions` table. An `onRequest` hook guards every `/api/*` except `/api/auth/login`; `/overlay`, `/uploads`, `/ws`, `/nb`, `/public`, `/leaderboard`, `/health`, and `/` (dashboard) are public.
+**Auth** (`server/src/auth.ts`, `routes/auth.ts`): password login (`ADMIN_PASSWORD`, default `admin`), bearer tokens persisted in the `sessions` table. An `onRequest` hook guards every `/api/*` except `/api/auth/login` and `/api/auth/pair/redeem` (phone QR login: an authed `POST /api/auth/pair` mints a single-use, 2-minute, in-memory code; the dashboard redeems `?pair=` at **module level** in `App.tsx` because StrictMode double-runs effects and would burn the code); `/overlay`, `/uploads`, `/ws`, `/nb`, `/public`, `/leaderboard`, `/health`, and `/` (dashboard) are public.
 
 **Spending rules live in one place.** `CommandsEngine.redeemTemplate()` and `RewardsEngine.claimReward()` hold all cost/cooldown/moderation logic and know nothing about chat. Any future caller (e.g. a web spending path) must go through them so paths cannot diverge. Do not reimplement these checks in a route.
 
