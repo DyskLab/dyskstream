@@ -1,0 +1,308 @@
+/* Overlay avatar penonton — karakter blob neobrutalism yang jalan-jalan di bawah layar.
+   Latar transparan untuk OBS. Skala diatur lewat --s (param ?scale=). */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  overflow: hidden;
+  font-family: "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
+}
+
+:root {
+  --s: 1;
+}
+
+.conn {
+  position: fixed;
+  top: 8px;
+  right: 8px;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 4px 8px;
+  border: 2px solid #000;
+  background: #ffe14d;
+  box-shadow: 3px 3px 0 #000;
+  z-index: 10;
+}
+.conn[data-state="open"] {
+  display: none;
+}
+.conn[data-state="closed"] {
+  background: #ff5c5c;
+  color: #fff;
+}
+
+.stage {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 0;
+}
+
+/* ---- Satu avatar: [bubble] [nama] [sprite], berdiri di garis lantai ---- */
+.av {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: calc(64px * var(--s));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  will-change: transform;
+  animation: av-in 0.25s ease-out;
+}
+.av.bye {
+  transition: opacity 0.5s, filter 0.5s;
+  opacity: 0;
+  filter: blur(2px);
+}
+@keyframes av-in {
+  from {
+    opacity: 0;
+  }
+}
+
+.tag {
+  display: flex;
+  align-items: center;
+  gap: calc(3px * var(--s));
+  white-space: nowrap;
+  font-size: calc(13px * var(--s));
+  font-weight: 900;
+  line-height: 1;
+  padding: calc(3px * var(--s)) calc(6px * var(--s));
+  background: #fff;
+  border: calc(2px * var(--s)) solid #000;
+  box-shadow: calc(2px * var(--s)) calc(2px * var(--s)) 0 #000;
+  margin-bottom: calc(2px * var(--s));
+  max-width: calc(170px * var(--s));
+}
+.tag .nm {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tag .lvl {
+  font-size: 0.75em;
+  padding: 1px 4px;
+  border: 1.5px solid #000;
+}
+.tag .lvl:empty {
+  display: none;
+}
+.av.owner .tag {
+  background: #ffde00;
+}
+.av.mod .tag {
+  background: #4dd4ff;
+}
+.av.member .tag {
+  background: #b9f5c0;
+}
+.no-names .tag {
+  display: none;
+}
+
+.bubble {
+  position: relative;
+  width: max-content;
+  max-width: calc(240px * var(--s));
+  font-size: calc(15px * var(--s));
+  font-weight: 800;
+  line-height: 1.25;
+  padding: calc(6px * var(--s)) calc(9px * var(--s));
+  background: #fff;
+  border: calc(3px * var(--s)) solid #000;
+  box-shadow: calc(3px * var(--s)) calc(3px * var(--s)) 0 #000;
+  margin-bottom: calc(8px * var(--s));
+  overflow-wrap: anywhere;
+  transform-origin: bottom center;
+  transform: scale(0);
+  opacity: 0;
+  transition: transform 0.18s cubic-bezier(0.3, 1.6, 0.6, 1), opacity 0.15s;
+}
+.bubble::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: calc(-9px * var(--s));
+  width: calc(10px * var(--s));
+  height: calc(10px * var(--s));
+  background: #fff;
+  border-right: calc(3px * var(--s)) solid #000;
+  border-bottom: calc(3px * var(--s)) solid #000;
+  transform: translateX(-50%) rotate(45deg);
+}
+.bubble.show {
+  transform: scale(1);
+  opacity: 1;
+}
+
+/* ---- Sprite: JS mengatur flip/bob/squash di .sprite, CSS animasi di .figure ---- */
+.sprite {
+  width: calc(64px * var(--s));
+  height: calc(84px * var(--s));
+  transform-origin: 50% 100%;
+}
+.figure {
+  width: 100%;
+  height: 100%;
+  transform-origin: 50% 100%;
+  transition: transform 0.25s;
+}
+.figure svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.foot,
+.eyes .open {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+/* Tipe kotak: tangan & kaki berayun dari sendi atas (bahu/pinggul). */
+.limb {
+  transform-box: fill-box;
+  transform-origin: 50% 0;
+}
+.av.walk .arm.l,
+.av.walk .leg.r {
+  animation: swing 0.32s infinite alternate ease-in-out;
+}
+.av.walk .arm.r,
+.av.walk .leg.l {
+  animation: swing 0.32s infinite alternate-reverse ease-in-out;
+}
+.av.dance .arm.l {
+  animation: wave-l 0.21s infinite alternate ease-in-out;
+}
+.av.dance .arm.r {
+  animation: wave-r 0.21s infinite alternate-reverse ease-in-out;
+}
+@keyframes swing {
+  from {
+    transform: rotate(-28deg);
+  }
+  to {
+    transform: rotate(28deg);
+  }
+}
+/* Tangan terangkat ke luar: kiri berputar searah jarum jam, kanan sebaliknya. */
+@keyframes wave-l {
+  from {
+    transform: rotate(150deg);
+  }
+  to {
+    transform: rotate(105deg);
+  }
+}
+@keyframes wave-r {
+  from {
+    transform: rotate(-150deg);
+  }
+  to {
+    transform: rotate(-105deg);
+  }
+}
+.av.walk .foot.l {
+  animation: step 0.28s infinite alternate ease-in-out;
+}
+.av.walk .foot.r {
+  animation: step 0.28s infinite alternate-reverse ease-in-out;
+}
+@keyframes step {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-4px);
+  }
+}
+
+.eyes .x,
+.eyes .closed {
+  display: none;
+}
+.av.blink .eyes .open {
+  transform: scaleY(0.1);
+}
+.av.sleep .eyes .open,
+.av.ko .eyes .open {
+  display: none;
+}
+.av.sleep .eyes .closed,
+.av.ko .eyes .x {
+  display: inline;
+}
+
+.av.dance .figure {
+  animation: dance 0.42s infinite alternate ease-in-out;
+}
+@keyframes dance {
+  from {
+    transform: rotate(-14deg) translateY(0);
+  }
+  to {
+    transform: rotate(14deg) translateY(-10%);
+  }
+}
+.av.ko .figure {
+  transform: rotate(-90deg) translateX(30%);
+}
+.av.sleep .figure {
+  transform: scale(1.04, 0.92);
+}
+
+/* ---- Efek melayang (hati, Zzz, ledakan duel) ---- */
+.fx {
+  position: absolute;
+  left: 50%;
+  bottom: calc(70px * var(--s));
+  font-size: calc(22px * var(--s));
+  font-weight: 900;
+  pointer-events: none;
+  animation: float-up 1.6s ease-out forwards;
+  text-shadow: 2px 2px 0 #000;
+}
+.fx.zzz {
+  color: #fff;
+  -webkit-text-stroke: 1px #000;
+}
+.fx.clash {
+  bottom: calc(30px * var(--s));
+  font-size: calc(46px * var(--s));
+  animation: clash 0.5s ease-out forwards;
+}
+@keyframes float-up {
+  from {
+    transform: translate(calc(-50% + var(--dx, 0px)), 0) scale(0.6);
+    opacity: 1;
+  }
+  to {
+    transform: translate(calc(-50% + var(--dx, 0px)), calc(-90px * var(--s))) scale(1.1);
+    opacity: 0;
+  }
+}
+@keyframes clash {
+  from {
+    transform: translateX(calc(-50% + var(--dx, 0px))) scale(0.2) rotate(-20deg);
+    opacity: 1;
+  }
+  60% {
+    transform: translateX(calc(-50% + var(--dx, 0px))) scale(1.2) rotate(8deg);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(calc(-50% + var(--dx, 0px))) scale(1) rotate(0);
+    opacity: 0;
+  }
+}

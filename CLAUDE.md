@@ -12,6 +12,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `overlay/` — static OBS Browser Source pages (vanilla JS/HTML/CSS). Served at `/overlay/`. No build step.
 - `dashboard/` — React + Vite + Tailwind v4 admin UI, neobrutalism style (port **4301** in dev).
 - `public/` — static public viewer leaderboard page, served at `/leaderboard/`.
+- `desktop/` — Electron wrapper (Electron 45 → **Node 24**, which has `node:sqlite`). `scripts/build.mjs` esbuild-bundles `server/src/index.ts` into one `build/server.mjs` (no `node_modules` shipped) and `src/main.ts`; main sets env (`DB_PATH`, `UPLOAD_DIR`, `OVERLAY_DIR`, `PUBLIC_DIR`, `DASHBOARD_DIR`, `LOG_FILE`, random `ADMIN_PASSWORD` in `userData/desktop.json`) then `import()`s the bundle in-process, and auto-logs the window in via the QR pairing endpoint. Overlay/public/dashboard ship as `extraResources`. Keep server code Node-24-compatible and bundle-safe (no runtime-resolved module paths — that's why `LOG_FILE` bypasses the `pino-pretty` transport).
 - `shared/types.ts` — types shared by server + dashboard (imported as `@shared/types` in the dashboard, relative path in the server). **`ServerEvent`** (the WS event union) and **`AlertTemplate`** live here.
 
 ## Commands (run server commands from `server/`, dashboard from `dashboard/`)
@@ -24,6 +25,10 @@ cd dashboard && npm install && npm run dev      # Vite, http://localhost:4301 (p
 # Type-check (no emit)
 cd server && npm run typecheck                  # tsc --noEmit
 cd dashboard && npm run build                    # tsc -b && vite build (also the way to type-check the UI)
+
+# Desktop app (from desktop/)
+cd desktop && npm install && npm start          # dev: bundle + run Electron (SA_DATA_DIR=<dir> to use a scratch data folder)
+cd desktop && npm run dist:mac                   # installer → desktop/release/ (dist:win for Windows NSIS)
 
 # Production (single port 4300; server serves dashboard/dist at /)
 docker compose up -d --build                     # or: pm2 start ecosystem.config.cjs (after building dashboard)
@@ -49,7 +54,7 @@ Step 4's guard is the last line of defense against a command string existing in 
 
 **Command replies use Nightbot, not this bot.** Anything that needs a chat reply (`!point`, `!rank`, `!coinflip`, `!gamble`) is a Nightbot custom command that `$(urlfetch)`s our `/nb/*` endpoints (`server/src/routes/nightbot.ts`, `games.ts`). These are public (Nightbot can't log in).
 
-**Overlays** are static pages served by `@fastify/static`. They either poll public endpoints (`/public/leaderboard`, `/public/goal`, `/public/runtext`, `/public/requests`, `/public/recent`) or open a WS as role `overlay`/`chat`. The alert overlay (`overlay/index.html` + `overlay.js`) drives the alert card, plays sound then TTS, and uses the YouTube IFrame API for video alerts with an adaptive muted-autoplay fallback for OBS.
+**Overlays** are static pages served by `@fastify/static`. They either poll public endpoints (`/public/leaderboard`, `/public/goal`, `/public/runtext`, `/public/requests`, `/public/recent`) or open a WS as role `overlay`/`chat`. `overlay/avatars.html` (viewer avatars) is purely client-side: it spawns a character per chatter from WS `chat` events and handles its own visual-only commands (`!lompat`, `!duel @nama`, …) — no server state, no points; `?type=blob|kotak|campur` picks the default character (viewers override with `!karakter`, stored in the OBS source's localStorage); `?demo=1` drives the dashboard preview. The alert overlay (`overlay/index.html` + `overlay.js`) drives the alert card, plays sound then TTS, and uses the YouTube IFrame API for video alerts with an adaptive muted-autoplay fallback for OBS.
 
 **Database** (`server/src/db/`): `migrate.ts` holds the `SCHEMA` string, an `ensureColumn(db, table, col, ddl)` helper, and `DEFAULT_SETTINGS`. Repos in `server/src/db/repo/*` wrap tables (`viewers`, `point_ledger`, `redemptions`, `alert_templates`, `settings`, `rewards`, `reward_claims`, `giveaway_winners`, `sounds`, `stream_sessions`, `sessions`). Points are scoped per `(host_channel_id × author_channel_id)`.
 

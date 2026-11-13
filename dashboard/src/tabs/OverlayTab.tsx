@@ -23,6 +23,31 @@ registerDict({
   "💬 Overlay Live Chat": "💬 Live Chat Overlay",
   "Kotak chat di layar. Muncul otomatis saat monitor aktif.":
     "On-screen chat box. Appears automatically when the monitor is active.",
+  "🐾 Avatar Penonton": "🐾 Viewer Avatars",
+  "Tiap penonton yang chat muncul jadi karakter lucu yang jalan-jalan di bawah layar, menampilkan chat-nya di balon. Murni visual — tidak memotong point.":
+    "Every viewer who chats appears as a cute character walking along the bottom of the screen, showing their chat in a bubble. Visual only — no points are spent.",
+  "Maks. avatar": "Max avatars",
+  "Tipe karakter": "Character type",
+  "🫧 Blob bulat": "🫧 Round blob",
+  "🧱 Kotak (pixel)": "🧱 Blocky (pixel)",
+  "🎲 Campur (acak per penonton)": "🎲 Mixed (random per viewer)",
+  "ganti tipe karakter sendiri (kotak / blob)": "switch your own character type (blocky / blob)",
+  "Ukuran": "Size",
+  "Hilang setelah diam (menit)": "Disappear after idle (min)",
+  "Jarak dari bawah (px)": "Distance from bottom (px)",
+  "Balon chat": "Chat bubbles",
+  "Nama": "Names",
+  "Command penonton": "Viewer commands",
+  "lompat": "jump",
+  "joget": "dance",
+  "menyapa": "say hi",
+  "hujan hati": "hearts",
+  "tidur (bangun saat chat lagi)": "sleep (wakes on next chat)",
+  "duel lucu, pemenang acak": "playful duel, random winner",
+  "ganti warna (pink, kuning, biru, hijau, ungu, oranye, merah, tosca, coklat, putih, hitam)":
+    "change color (pink, yellow, blue, green, purple, orange, red, teal, brown, white, black)",
+  "Host dapat mahkota, moderator topi biru, member topi pesta. Pratinjau memakai penonton demo.":
+    "Host gets a crown, moderators a blue cap, members a party hat. The preview uses demo viewers.",
   "📰 Ticker Event Terbaru": "📰 Latest Event Ticker",
   "Bar berjalan berisi alert terbaru (cocok di bawah layar).":
     "Scrolling bar with the latest alerts (fits at the bottom of the screen).",
@@ -160,6 +185,21 @@ export function OverlayTab() {
   const [name, setName] = useState("@donatur");
   const [message, setMessage] = useState("Semangat streaming-nya! 🔥");
   const [testMsg, setTestMsg] = useState<string | null>(null);
+
+  // Param overlay avatar penonton (hanya yang beda dari default yang masuk URL)
+  const [av, setAv] = useState({ type: "blob", max: 40, scale: 1, idle: 10, floor: 0, bubble: true, names: true });
+  const avParams = new URLSearchParams();
+  if (av.type !== "blob") avParams.set("type", av.type);
+  if (av.max !== 40) avParams.set("max", String(av.max));
+  if (av.scale !== 1) avParams.set("scale", String(av.scale));
+  if (av.idle !== 10) avParams.set("idle", String(av.idle * 60));
+  if (av.floor !== 0) avParams.set("floor", String(av.floor));
+  if (!av.bubble) avParams.set("bubble", "0");
+  if (!av.names) avParams.set("names", "0");
+  const avQuery = avParams.toString() ? `?${avParams}` : "";
+  const avPreviewQuery = `?${new URLSearchParams({ ...Object.fromEntries(avParams), demo: "1" })}`;
+  const avNum = (k: "max" | "scale" | "idle" | "floor", v: string, min: number, max: number) =>
+    setAv((p) => ({ ...p, [k]: Math.min(max, Math.max(min, Number(v) || 0)) }));
 
   // Param leaderboard overlay
   const [limit, setLimit] = useState(5);
@@ -314,6 +354,78 @@ export function OverlayTab() {
           <div>
             <span className="block mb-1 font-extrabold text-sm uppercase">{t("Pratinjau")}</span>
             <Preview src={`${OVERLAY_BASE}/overlay/chat.html`} />
+          </div>
+        </div>
+      </Card>
+
+      {/* AVATAR PENONTON */}
+      <Card title={t("🐾 Avatar Penonton")} accent="var(--green)">
+        <div className="grid md:grid-cols-2 gap-4 items-start">
+          <div>
+            <p className="text-sm opacity-70 mb-2">
+              {t(
+                "Tiap penonton yang chat muncul jadi karakter lucu yang jalan-jalan di bawah layar, menampilkan chat-nya di balon. Murni visual — tidak memotong point.",
+              )}
+            </p>
+            <Field label={t("Tipe karakter")}>
+              <select className="neo-input" value={av.type} onChange={(e) => setAv((p) => ({ ...p, type: e.target.value }))}>
+                <option value="blob">{t("🫧 Blob bulat")}</option>
+                <option value="kotak">{t("🧱 Kotak (pixel)")}</option>
+                <option value="campur">{t("🎲 Campur (acak per penonton)")}</option>
+              </select>
+            </Field>
+            <div className="grid grid-cols-2 gap-3">
+              <Field label={t("Maks. avatar")}>
+                <TextInput type="number" min={1} max={150} value={String(av.max)} onChange={(e) => avNum("max", e.target.value, 1, 150)} />
+              </Field>
+              <Field label={t("Ukuran")}>
+                <select className="neo-input" value={String(av.scale)} onChange={(e) => setAv((p) => ({ ...p, scale: Number(e.target.value) }))}>
+                  {[0.6, 0.8, 1, 1.25, 1.5, 2].map((v) => (
+                    <option key={v} value={v}>
+                      {v}×
+                    </option>
+                  ))}
+                </select>
+              </Field>
+              <Field label={t("Hilang setelah diam (menit)")}>
+                <TextInput type="number" min={1} max={120} value={String(av.idle)} onChange={(e) => avNum("idle", e.target.value, 1, 120)} />
+              </Field>
+              <Field label={t("Jarak dari bawah (px)")}>
+                <TextInput type="number" min={0} max={1000} value={String(av.floor)} onChange={(e) => avNum("floor", e.target.value, 0, 1000)} />
+              </Field>
+            </div>
+            <div className="flex gap-4 mb-3 text-sm font-bold">
+              <label className="flex items-center gap-2">
+                <input type="checkbox" checked={av.bubble} onChange={(e) => setAv((p) => ({ ...p, bubble: e.target.checked }))} />
+                {t("Balon chat")}
+              </label>
+              <label className="flex items-center gap-2">
+                <input type="checkbox" checked={av.names} onChange={(e) => setAv((p) => ({ ...p, names: e.target.checked }))} />
+                {t("Nama")}
+              </label>
+            </div>
+            <Tag>{t("URL OBS")}</Tag>
+            <div className="mt-1 mb-3">
+              <CopyUrl url={`${OVERLAY_BASE}/overlay/avatars.html${avQuery}`} />
+            </div>
+            <Tag style={{ background: "var(--yellow)" }}>{t("Command penonton")}</Tag>
+            <ul className="mt-1 text-sm leading-6">
+              <li><code>!lompat</code> — {t("lompat")}</li>
+              <li><code>!joget</code> — {t("joget")}</li>
+              <li><code>!sapa</code> — {t("menyapa")}</li>
+              <li><code>!love</code> — {t("hujan hati")}</li>
+              <li><code>!tidur</code> — {t("tidur (bangun saat chat lagi)")}</li>
+              <li><code>!duel @nama</code> — {t("duel lucu, pemenang acak")}</li>
+              <li><code>!karakter kotak</code> — {t("ganti tipe karakter sendiri (kotak / blob)")}</li>
+              <li><code>!warna biru</code> — {t("ganti warna (pink, kuning, biru, hijau, ungu, oranye, merah, tosca, coklat, putih, hitam)")}</li>
+            </ul>
+            <p className="text-xs opacity-60 mt-2">
+              {t("Host dapat mahkota, moderator topi biru, member topi pesta. Pratinjau memakai penonton demo.")}
+            </p>
+          </div>
+          <div>
+            <span className="block mb-1 font-extrabold text-sm uppercase">{t("Pratinjau")}</span>
+            <Preview src={`${OVERLAY_BASE}/overlay/avatars.html${avPreviewQuery}`} />
           </div>
         </div>
       </Card>
