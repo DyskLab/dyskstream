@@ -1,0 +1,71 @@
+{
+  "name": "streaming-assistant-desktop",
+  "productName": "Streaming Assistant",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Aplikasi desktop Streaming Assistant (server + dashboard dalam satu aplikasi)",
+  "main": "build/main.js",
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "electron": "^45.3.0",
+    "electron-builder": "^26.18.0",
+    "esbuild": "^0.28.2",
+    "typescript": "^5.9.3"
+  },
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "build:dashboard": "npm --prefix ../dashboard ci && npm --prefix ../dashboard run build",
+    "start": "npm run build && electron .",
+    "typecheck": "tsc --noEmit",
+    "dist": "npm run build:dashboard && npm run build && electron-builder",
+    "dist:mac": "npm run build:dashboard && npm run build && electron-builder --mac",
+    "dist:win": "npm run build:dashboard && npm run build && electron-builder --win"
+  },
+  "build": {
+    "appId": "id.streamingassistant.desktop",
+    "productName": "Streaming Assistant",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "build/**",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "../overlay",
+        "to": "overlay"
+      },
+      {
+        "from": "../public",
+        "to": "public"
+      },
+      {
+        "from": "../dashboard/dist",
+        "to": "dashboard"
+      },
+      {
+        "from": "assets",
+        "to": "assets"
+      }
+    ],
+    "icon": "assets/icon.png",
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "category": "public.app-category.video"
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true
+    }
+  }
+}

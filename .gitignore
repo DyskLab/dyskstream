@@ -18,3 +18,7 @@ data/
 *.log
 npm-debug.log*
 .DS_Store
+
+# Desktop (Electron) build output
+desktop/build/
+desktop/release/

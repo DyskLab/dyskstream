@@ -15,9 +15,12 @@ export const config = {
   host: envStr("HOST", "0.0.0.0"),
   dbPath: resolve(serverRoot, envStr("DB_PATH", "./data.sqlite")),
   uploadDir: resolve(serverRoot, envStr("UPLOAD_DIR", "./uploads")),
-  overlayDir: resolve(serverRoot, "../overlay"),
-  publicDir: resolve(serverRoot, "../public"),
-  dashboardDir: resolve(serverRoot, "../dashboard/dist"),
+  // Bisa di-override (dipakai aplikasi desktop: aset ada di folder resources).
+  overlayDir: resolve(serverRoot, envStr("OVERLAY_DIR", "../overlay")),
+  publicDir: resolve(serverRoot, envStr("PUBLIC_DIR", "../public")),
+  dashboardDir: resolve(serverRoot, envStr("DASHBOARD_DIR", "../dashboard/dist")),
+  /** Kalau di-set, log ditulis ke file ini (tanpa pino-pretty) — untuk build ter-bundle. */
+  logFile: process.env.LOG_FILE || null,
   adminPassword: envStr("ADMIN_PASSWORD", "admin"),
   get usingDefaultPassword(): boolean {
     return !process.env.ADMIN_PASSWORD || process.env.ADMIN_PASSWORD.length === 0;

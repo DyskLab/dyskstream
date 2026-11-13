@@ -46,8 +46,10 @@ import { discordRoutes } from "./routes/discord.ts";
 import { obsRoutes } from "./routes/obs.ts";
 import type { ClientEvent, WsRole } from "../../shared/types.ts";
 
+// pino-pretty jalan di worker thread yang tidak bisa ikut di-bundle (aplikasi desktop),
+// jadi build ter-bundle menulis log polos ke LOG_FILE.
 const app = Fastify({
-  logger: { transport: { target: "pino-pretty" } },
+  logger: config.logFile ? { file: config.logFile } : { transport: { target: "pino-pretty" } },
 });
 
 // DB harus siap sebelum auth (sesi disimpan di DB agar tahan restart).
