@@ -35,12 +35,9 @@ export function Login({ onSuccess, notice }: { onSuccess: () => void; notice?: s
   return (
     <div className="min-h-screen grid place-items-center p-4">
       <div className="neo-lg bg-white p-6 w-full max-w-sm">
-        <img src="/favicon.svg" alt="" width={56} height={56} className="mb-4" style={{ borderRadius: 13 }} />
-        <div
-          className="text-2xl font-black uppercase px-3 py-1 mb-5 inline-block"
-          style={{ background: "var(--pink)", border: "3px solid #000", boxShadow: "4px 4px 0 #000" }}
-        >
-          DyskStream
+        <div className="flex items-center gap-3 mb-5">
+          <img src="/favicon.svg" alt="" width={44} height={44} className="shrink-0" style={{ borderRadius: 10 }} />
+          <span className="text-2xl font-black uppercase">DyskStream</span>
         </div>
         <h1 className="font-extrabold uppercase text-lg mb-3">{t("🔒 Login Admin")}</h1>
         <TextInput

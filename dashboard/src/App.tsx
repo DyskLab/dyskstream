@@ -191,12 +191,7 @@ export function App() {
       <header className="neo-lg bg-white p-4 mb-5 flex flex-wrap items-center gap-3 justify-between">
         <div className="flex items-center gap-3">
           <img src="/favicon.svg" alt="" width={44} height={44} className="shrink-0" style={{ borderRadius: 10 }} />
-          <span
-            className="text-2xl font-black uppercase px-3 py-1"
-            style={{ background: "var(--pink)", border: "3px solid #000", boxShadow: "4px 4px 0 #000" }}
-          >
-            DyskStream
-          </span>
+          <span className="text-2xl font-black uppercase">DyskStream</span>
         </div>
         <div className="flex items-center gap-3 text-sm font-extrabold">
           <span className="flex items-center gap-2">
