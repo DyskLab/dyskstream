@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-`streaming-assistant` — a self-hosted bot for **YouTube Live** (UI is in Bahasa Indonesia; dashboard also supports English). It reads any channel's live chat, awards points to commenting viewers, and turns points into Saweria-style alerts shown in OBS. Full technical plan lives in `docs/TECHNICAL-PLAN.md`.
+`dyskstream` (formerly streaming-assistant) — a self-hosted bot for **YouTube Live** (UI is in Bahasa Indonesia; dashboard also supports English). It reads any channel's live chat, awards points to commenting viewers, and turns points into Saweria-style alerts shown in OBS. Full technical plan lives in `docs/TECHNICAL-PLAN.md`.
 
 ## Monorepo layout
 

@@ -9,7 +9,7 @@
 module.exports = {
   apps: [
     {
-      name: "streaming-assistant",
+      name: "dyskstream",
       cwd: "./server",
       script: "npm",
       args: "start",

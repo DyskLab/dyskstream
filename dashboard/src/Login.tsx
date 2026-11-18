@@ -39,7 +39,7 @@ export function Login({ onSuccess, notice }: { onSuccess: () => void; notice?: s
           className="text-2xl font-black uppercase px-3 py-1 mb-5 inline-block"
           style={{ background: "var(--pink)", border: "3px solid #000", boxShadow: "4px 4px 0 #000" }}
         >
-          Streaming Assistant
+          DyskStream
         </div>
         <h1 className="font-extrabold uppercase text-lg mb-3">{t("🔒 Login Admin")}</h1>
         <TextInput

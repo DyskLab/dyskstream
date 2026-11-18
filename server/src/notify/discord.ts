@@ -28,7 +28,7 @@ export class DiscordNotifier {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          username: this.settings.get<string>("discord.username", "Streaming Assistant"),
+          username: this.settings.get<string>("discord.username", "DyskStream"),
           embeds: [{ timestamp: new Date().toISOString(), ...embed }],
         }),
       });

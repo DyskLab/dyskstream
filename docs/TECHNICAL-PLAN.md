@@ -1,4 +1,4 @@
-# Streaming Assistant — Rencana Teknis (MVP-1)
+# DyskStream — Rencana Teknis (MVP-1)
 
 Bot untuk YouTube Live: baca live chat channel manapun (tanpa auth), sistem point
 per penonton, command `!alert` yang menukar point jadi notifikasi ala Saweria di
@@ -45,7 +45,7 @@ YouTube live chat ──(masterchat, no auth)──▶ ChatReader
 ## 3. Struktur repo (monorepo sederhana)
 
 ```
-streaming-assistant/
+dyskstream/
 ├─ server/
 │  ├─ src/
 │  │  ├─ index.ts              bootstrap Fastify + plugins + routes + WS

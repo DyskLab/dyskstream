@@ -6,11 +6,11 @@
 import { app, BrowserWindow, Tray, Menu, shell, clipboard, dialog, nativeImage } from "electron";
 import { createServer } from "node:net";
 import { randomBytes } from "node:crypto";
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { pathToFileURL } from "node:url";
 
-const APP_NAME = "Streaming Assistant";
+const APP_NAME = "DyskStream";
 
 interface DesktopSettings {
   port: number;
@@ -29,7 +29,9 @@ const appRoot = app.getAppPath(); // desktop/ saat dev, .../app.asar saat dipake
 const resDir = app.isPackaged ? process.resourcesPath : join(appRoot, "..");
 const assetDir = app.isPackaged ? join(process.resourcesPath, "assets") : join(appRoot, "assets");
 // SA_DATA_DIR: folder data alternatif (uji coba / mode portable).
-const dataDir = process.env.SA_DATA_DIR || app.getPath("userData");
+// Instalasi dari sebelum ganti nama (Streaming Assistant) tetap memakai folder datanya yang lama.
+const legacyDataDir = join(app.getPath("appData"), "Streaming Assistant");
+const dataDir = process.env.SA_DATA_DIR || (existsSync(legacyDataDir) ? legacyDataDir : app.getPath("userData"));
 
 const paths = {
   overlay: join(resDir, "overlay"),
@@ -202,7 +204,7 @@ async function boot(): Promise<void> {
   if (!(await portFree(settings.port))) {
     dialog.showErrorBox(
       APP_NAME,
-      `Port ${settings.port} sedang dipakai program lain (mungkin server Streaming Assistant ` +
+      `Port ${settings.port} sedang dipakai program lain (mungkin server DyskStream ` +
         `versi terminal masih jalan). Tutup program itu lalu buka aplikasi ini lagi.\n\n` +
         `Port bisa diubah di:\n${paths.settings}`,
     );

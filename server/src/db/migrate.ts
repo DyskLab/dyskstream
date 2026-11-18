@@ -186,7 +186,7 @@ export const DEFAULT_SETTINGS: Record<string, unknown> = {
   // Discord webhook (notifikasi ke server Discord).
   "discord.enabled": false,
   "discord.webhookUrl": "",
-  "discord.username": "Streaming Assistant",
+  "discord.username": "DyskStream",
   "discord.onStreamStart": true,
   "discord.onSuperchat": true,
   "discord.onGiveaway": true,

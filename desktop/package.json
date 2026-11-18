@@ -1,10 +1,10 @@
 {
-  "name": "streaming-assistant-desktop",
-  "productName": "Streaming Assistant",
+  "name": "dyskstream-desktop",
+  "productName": "DyskStream",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "Aplikasi desktop Streaming Assistant (server + dashboard dalam satu aplikasi)",
+  "description": "Aplikasi desktop DyskStream (server + dashboard dalam satu aplikasi)",
   "main": "build/main.js",
   "devDependencies": {
     "@types/node": "^24.19.2",
@@ -23,8 +23,8 @@
     "dist:win": "npm run build:dashboard && npm run build && electron-builder --win"
   },
   "build": {
-    "appId": "id.streamingassistant.desktop",
-    "productName": "Streaming Assistant",
+    "appId": "dev.fanny.dyskstream",
+    "productName": "DyskStream",
     "directories": {
       "output": "release"
     },

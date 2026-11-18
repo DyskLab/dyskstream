@@ -1,199 +1,149 @@
-# Streaming Assistant
+<p align="center">
+  <img src="docs/icon.png" width="88" alt="DyskStream">
+</p>
 
-Bot untuk **YouTube Live**: baca live chat channel manapun, beri **point** ke tiap
-penonton yang komen, dan command **`!alert <pesan>`** menukar point jadi notifikasi
-ala Saweria yang tampil di **OBS**. Balasan command umum & moderasi di chat
-diserahkan ke **Nightbot**.
+<h1 align="center">DyskStream</h1>
 
-> Baca chat **tanpa login/OAuth** (pakai `masterchat`) — cukup URL/ID video live.
+<p align="center">A self-hosted YouTube Live assistant: viewers earn points for chatting and spend them on alerts that pop up in OBS.</p>
 
-## ✨ Fitur
+<p align="center">
+  <a href="https://dysklab.fanny.dev"><img src="https://img.shields.io/badge/part%20of-DyskLab-A855F7" alt="Part of DyskLab"></a>
+  <a href="https://buymeacoffee.com/fannydevz"><img src="https://img.shields.io/badge/Buy%20Me%20a%20Coffee-support-FFDD00?logo=buymeacoffee&logoColor=000" alt="Buy Me a Coffee"></a>
+</p>
 
-- 📡 **Baca live chat** channel publik manapun (tanpa API key, tanpa kuota).
-- 🪙 **Sistem point**: +1 per komentar (cooldown), bonus command, leaderboard.
-- 🔔 **`!alert <pesan>`**: potong point → alert muncul di OBS (gambar/suara/TTS custom).
-- 🎨 **Overlay OBS** gaya neobrutalism + antrian alert 1-per-1 (anti numpuk).
-- 🎛️ **Dashboard**: monitor, leaderboard, atur semua aturan, editor template + Test Alert.
-- 🤖 **Nightbot**: command `!point` / `!rank` lewat `$(urlfetch)`.
+DyskStream reads the live chat of any public YouTube stream, with no login, API key, or quota: paste the video URL
+and it starts. Every comment earns points, and `!alert <message>` spends them on a Saweria-style alert in OBS.
+Replies to chat commands and moderation are left to [Nightbot](https://nightbot.tv).
 
-## 🧩 Arsitektur singkat
+> The interface is in Indonesian (the dashboard also has English). DyskStream was called **Streaming Assistant**
+> before it joined DyskLab.
 
-```
-YouTube live chat ──(masterchat)──▶ Backend Fastify ──WebSocket──▶ Overlay (OBS)
-                                        │  SQLite                └▶ Dashboard
-                                        └──/nb/*──▶ Nightbot $(urlfetch)
-```
+## Get it
 
-Detail teknis lengkap: [`docs/TECHNICAL-PLAN.md`](docs/TECHNICAL-PLAN.md).
+### Desktop app
 
-## ✅ Prasyarat
-
-- **Node.js 22+** (butuh modul bawaan `node:sqlite`). Diuji di Node 25.
-- Port default: backend **4300**, dashboard dev **4301** (ubah lewat `PORT` bila bentrok).
-
-## 🚀 Menjalankan (mode dev)
-
-Dua terminal:
+The Electron app runs the server and the dashboard in one window, with a tray icon. Build it yourself:
 
 ```bash
-# Terminal 1 — backend
-cd server
+git clone https://github.com/DyskLab/dyskstream.git
+cd dyskstream/desktop
 npm install
-npm run dev            # http://localhost:4300
-
-# Terminal 2 — dashboard
-cd dashboard
-npm install
-npm run dev            # http://localhost:4301
+npm run dist:mac      # or: npm run dist:win
 ```
 
-Lalu buka **http://localhost:4301** di browser.
+The installer lands in `desktop/release/`. Data is kept in the app's data folder (an install from before the rename
+keeps using its old `Streaming Assistant` folder).
 
-## 🌐 Deploy 24/7 (produksi)
+### Server (24/7)
 
-Di produksi semua jalan **satu port** (4300): dashboard hasil build disajikan langsung
-oleh server di `/`, jadi tak perlu Vite. Data (SQLite + upload) disimpan di folder
-`./data` (Docker) atau `server/` (PM2).
+In production everything runs on one port (4300): the built dashboard, the overlays, and the API.
 
-### Cara A — Docker (paling simpel)
+**Docker:**
 
 ```bash
-# 1) set password admin
-echo "ADMIN_PASSWORD=passwordku" > .env
-
-# 2) build & jalankan (auto-restart, data persist di ./data)
+echo "ADMIN_PASSWORD=your-password" > .env
 docker compose up -d --build
-
-# lihat log / stop
-docker compose logs -f
-docker compose down
 ```
 
-Buka **http://SERVER:4300** — dashboard, overlay, dan API semuanya di sini.
-
-### Cara B — PM2 (tanpa Docker)
+**PM2:**
 
 ```bash
 npm i -g pm2
-cd dashboard && npm ci && npm run build      # build dashboard sekali
+cd dashboard && npm ci && npm run build
 cd ../server && npm ci
-cp .env.example .env                          # lalu set ADMIN_PASSWORD
+cp .env.example .env                 # then set ADMIN_PASSWORD
 cd .. && pm2 start ecosystem.config.cjs
-pm2 save && pm2 startup                        # auto-start saat reboot
+pm2 save && pm2 startup
 ```
 
-> Butuh **Node 25+** (memakai `node:sqlite` bawaan). URL overlay untuk OBS jadi
-> `http://SERVER:4300/overlay/`.
+Open http://SERVER:4300. Data (SQLite and uploads) is in `./data` with Docker or `server/` with PM2.
 
-### Akses dari internet (untuk Nightbot / nonton dari luar)
+**Requires:** Node.js 25 or later (for the built-in `node:sqlite`).
 
-Pakai tunnel supaya server lokal bisa diakses publik:
+## Features
 
-```bash
-cloudflared tunnel --url http://localhost:4300
-# atau: ngrok http 4300
-```
+- **Live chat reader** for any public channel, through [masterchat](https://github.com/sigvt/masterchat).
+- **Points:** +1 per comment with a cooldown, bonus commands, and a leaderboard.
+- **`!alert <message>`:** spends points and shows an alert in OBS with your own image, sound, or TTS, queued one at a
+  time so they never pile up.
+- **OBS overlays:** alerts, live chat, leaderboard, event ticker, request queue, running text, a goal bar, and viewer
+  avatars (blob and blocky characters).
+- **Full-screen scenes:** starting soon, be right back, and stream ended.
+- **Dashboard:** monitor, leaderboard, rules, a template editor with Test Alert, and a soundboard with hotkeys.
+- **Open on your phone:** sign in to the dashboard from your phone by scanning a QR code.
+- **Nightbot:** `!point` and `!rank` through `$(urlfetch)`.
+- **Public leaderboard** page you can share with viewers.
 
-Pakai URL publik yang muncul untuk endpoint Nightbot (lihat bagian Integrasi Nightbot).
+## Using it
 
-### Alur pemakaian
+1. **Monitor:** paste the live video URL or ID and press **Mulai**.
+2. Points start adding up; check **Leaderboard**.
+3. **Alert:** set up the template and press **Kirim Test**.
+4. **Aturan:** change the `!alert` cost, cooldown, banned words, and the rest, then **Simpan**.
 
-1. Tab **📡 Monitor** → paste URL/ID video live → **Mulai**.
-2. Point mulai terkumpul; cek tab **🏆 Leaderboard**.
-3. Tab **🎨 Alert** → atur template, klik **Kirim Test** untuk mencoba.
-4. Tab **⚙️ Aturan** → ubah biaya `!alert`, cooldown, kata kasar, dll → **Simpan**.
+## OBS
 
-## 🔒 Keamanan / Login
-
-Dashboard dilindungi password. Atur di `server/.env`:
-
-```bash
-ADMIN_PASSWORD=password-rahasia-kamu   # default 'admin' — WAJIB diganti
-```
-
-- Semua endpoint admin (`/api/*`) butuh login; dashboard menyimpan token sesi.
-- Yang **tetap publik** (memang harus): overlay OBS (`/overlay/*`), endpoint Nightbot
-  (`/nb/*`), file upload (`/uploads/*`), WebSocket, dan `/health`.
-- Token sesi disimpan di tabel `sessions` (tahan restart, kedaluwarsa 30 hari).
-
-## 📺 Setup OBS
-
-Dua overlay tersedia (pasang sebagai Browser Source masing-masing):
+Add each overlay as a **Browser** source at your canvas size (for example 1920×1080). Its background is transparent.
+Turn off **Shutdown source when not visible** so the WebSocket stays connected.
 
 | Overlay | URL |
-|---|---|
-| **Alert** (notif `!alert` ala Saweria) | `http://localhost:4300/overlay/` |
-| **Live Chat** (chat box di layar) | `http://localhost:4300/overlay/chat.html` |
-| **Leaderboard** (kompak, live via WS) | `http://localhost:4300/overlay/leaderboard.html` |
-| **Ticker** (alert terbaru berjalan) | `http://localhost:4300/overlay/ticker.html` |
+| --- | --- |
+| Alert | `http://localhost:4300/overlay/` |
+| Live chat | `http://localhost:4300/overlay/chat.html` |
+| Leaderboard | `http://localhost:4300/overlay/leaderboard.html?limit=5&pos=top-right` |
+| Ticker | `http://localhost:4300/overlay/ticker.html` |
+| Request queue | `http://localhost:4300/overlay/requests.html` |
+| Goal bar | `http://localhost:4300/overlay/goal.html` |
+| Viewer avatars | `http://localhost:4300/overlay/avatars.html` |
+| Scenes | `scene-start.html`, `scene-brb.html`, `scene-end.html` in `/overlay/` |
 
-Halaman **Leaderboard publik** (tanpa login, bisa dibagikan ke penonton) ada di
-`http://localhost:4300/leaderboard/` — tambah `?overlay` untuk versi transparan OBS.
+The public leaderboard is at `http://localhost:4300/leaderboard/` (add `?overlay` for a transparent version).
 
-**Overlay leaderboard** (kompak, update live via WebSocket) untuk dipajang di stream:
-`http://localhost:4300/overlay/leaderboard.html`. Parameter opsional:
-`?limit=5` (jumlah baris), `?pos=top-right|top-left|bottom-right|bottom-left` (posisi),
-`?title=TOP%20DONATUR` (judul).
+## Nightbot
 
-1. Di OBS: **Sources → + → Browser**.
-2. Isi URL sesuai tabel di atas.
-3. Ukuran: samakan dengan canvas (mis. 1920×1080). Background overlay transparan.
-4. Centang **"Shutdown source when not visible"** = OFF supaya WebSocket tetap tersambung.
-5. Alert muncul otomatis tiap ada `!alert` (atau klik Test di dashboard); chat overlay
-   menampilkan pesan live yang masuk.
+DyskStream never posts to chat, so commands that need a reply go through Nightbot:
 
-> Di OBS suara & TTS autoplay. Di browser biasa, klik dulu sekali di halaman overlay
-> agar audio terbuka.
+1. Make the server public, for example `cloudflared tunnel --url http://localhost:4300`.
+2. In Nightbot, add `!point` → `$(urlfetch https://<your-url>/nb/points?u=$(user))` and `!rank` →
+   `$(urlfetch https://<your-url>/nb/rank?u=$(user))`.
 
-## 🤖 Integrasi Nightbot (opsional, untuk `!point`)
+Reply formats are set in **Aturan** (`nightbot.pointsReply` and others).
 
-Karena bot **tidak posting ke chat**, command yang butuh balasan diserahkan ke Nightbot
-yang memanggil endpoint kita:
+## Security
 
-1. Server harus bisa diakses publik. Kalau jalan lokal, buka tunnel:
-   ```bash
-   cloudflared tunnel --url http://localhost:4300
-   # atau: ngrok http 4300
-   ```
-   Catat URL publiknya, mis. `https://xxxx.trycloudflare.com`.
-2. Di Nightbot, buat custom command:
-   - **`!point`** →
-     `$(urlfetch https://xxxx.trycloudflare.com/nb/points?u=$(user))`
-   - **`!rank`** →
-     `$(urlfetch https://xxxx.trycloudflare.com/nb/rank?u=$(user))`
-3. Penonton ketik `!point` → Nightbot posting balasannya, mis.
-   `@budi point kamu: 120 🪙`.
+The dashboard is protected by `ADMIN_PASSWORD` (default `admin`, so change it). Every `/api/*` endpoint needs a
+session. Overlays, `/nb/*`, `/uploads/*`, the WebSocket, and `/health` stay public because OBS and Nightbot need them.
+Sessions survive restarts and expire after 30 days.
 
-Format balasan bisa diubah di tab **Aturan** (`nightbot.pointsReply`, dll).
-Command chat umum lain (`!jadwal`, `!sosmed`) + moderasi kata cukup diatur di Nightbot.
+## Development
 
-## 🪙 Cara kerja point & `!alert`
-
-- Tiap komentar: **+1 point** (default), dibatasi **cooldown** agar spam tak menghasilkan point.
-- Penonton ketik **`!alert pesan keren`**:
-  - dicek: point cukup? cooldown lewat? pesan tak terlalu panjang / tak ada kata kasar?
-  - kalau lolos → point dipotong (`alert.cost`, default 50) → alert tampil di OBS.
-- Semua angka (earn, cost, cooldown, panjang, kata kasar, bonus command) **diatur dari
-  dashboard** dan tersimpan di SQLite.
-
-## 🗂️ Struktur
-
-```
-server/     Backend Fastify + masterchat + SQLite (data.sqlite) + uploads/
-overlay/    Halaman alert untuk OBS Browser Source
-dashboard/  Panel kontrol (React + Vite + Tailwind, gaya neobrutalism)
-public/     Halaman penonton: leaderboard
-shared/     Tipe bersama (WebSocket events, dll)
-docs/       Rencana teknis
+```bash
+cd server && npm install && npm run dev        # http://localhost:4300
+cd dashboard && npm install && npm run dev     # http://localhost:4301
+cd desktop && npm install && npm start         # desktop app
 ```
 
-## ⚠️ Catatan
-
-- **`masterchat` tidak resmi** — bisa rusak bila YouTube mengubah format internalnya.
-  Reader ada di balik interface `ChatReader` sehingga bisa diganti ke YouTube Data API
-  resmi (butuh API key + kuota) bila perlu.
-- Data disimpan di `server/data.sqlite` (backup = salin file itu). Upload di `server/uploads/`.
-- Untuk produksi 24/7: build dashboard (`npm run build` di `dashboard/`) dan serve
-  hasilnya, jalankan server dengan process manager (mis. `pm2`/systemd), dan pasang
-  tunnel/reverse-proxy bila butuh Nightbot.
 ```
+server/     Fastify, masterchat, SQLite, uploads
+dashboard/  control panel (React, Vite, Tailwind)
+overlay/    OBS browser sources
+public/     viewer leaderboard
+desktop/    Electron app
+shared/     types shared by the server and clients
+docs/       technical plan (in Indonesian)
+```
+
+> masterchat is unofficial and can break when YouTube changes its internals. The reader sits behind a `ChatReader`
+> interface so it can be swapped for the official YouTube Data API.
+
+## Support
+
+If DyskStream helps you, you can [buy me a coffee](https://buymeacoffee.com/fannydevz).
+
+## Part of DyskLab
+
+DyskStream is part of [DyskLab](https://dysklab.fanny.dev), alongside
+[DyskFlow](https://github.com/DyskLab/dyskflow), [DyskFocus](https://github.com/DyskLab/dyskfocus),
+[DyskFiles](https://github.com/DyskLab/dyskfiles), [DyskPOS](https://github.com/DyskLab/dyskpos), and DyskLink for
+[Mac](https://github.com/DyskLab/dysklink-mac), [Android](https://github.com/DyskLab/dysklink-android), and
+[Windows and Linux](https://github.com/DyskLab/dysklink-desktop).

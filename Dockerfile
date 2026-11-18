@@ -1,4 +1,4 @@
-# Streaming Assistant — image produksi satu-port (server + dashboard + overlay).
+# DyskStream — image produksi satu-port (server + dashboard + overlay).
 # Butuh Node 25+ karena memakai `node:sqlite` bawaan (bukan better-sqlite3).
 
 # --- Tahap 1: build dashboard (React/Vite) jadi file statis ---

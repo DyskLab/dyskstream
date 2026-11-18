@@ -1,4 +1,4 @@
-# Jalankan Streaming Assistant 24/7. Data (SQLite + upload) persist di ./data.
+# Jalankan DyskStream 24/7. Data (SQLite + upload) persist di ./data.
 #
 #   docker compose up -d --build      # mulai / update
 #   docker compose logs -f            # lihat log
@@ -7,8 +7,8 @@
 services:
   app:
     build: .
-    image: streaming-assistant
-    container_name: streaming-assistant
+    image: dyskstream
+    container_name: dyskstream
     restart: unless-stopped
     ports:
       - "4300:4300"

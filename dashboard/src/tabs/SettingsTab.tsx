@@ -286,7 +286,7 @@ export function SettingsTab() {
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
       const a = document.createElement("a");
       a.href = URL.createObjectURL(blob);
-      a.download = "streaming-assistant-config.json";
+      a.download = "dyskstream-config.json";
       a.click();
       URL.revokeObjectURL(a.href);
       toast(t("Config diekspor 💾"), true);
@@ -317,7 +317,7 @@ export function SettingsTab() {
       await api.putSettings({
         "discord.enabled": discordEnabled,
         "discord.webhookUrl": String(vals["discord.webhookUrl"] ?? ""),
-        "discord.username": String(vals["discord.username"] ?? "Streaming Assistant"),
+        "discord.username": String(vals["discord.username"] ?? "DyskStream"),
       });
       await api.discordTest();
       toast(t("Pesan test terkirim ke Discord ✅"), true);
