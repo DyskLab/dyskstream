@@ -18,6 +18,16 @@ Replies to chat commands and moderation are left to [Nightbot](https://nightbot.
 > The interface is in Indonesian (the dashboard also has English). DyskStream was called **Streaming Assistant**
 > before it joined DyskLab.
 
+![Dashboard](docs/screenshots/monitor.png)
+
+| Alert in OBS | Viewer avatars in OBS |
+| --- | --- |
+| ![Alert overlay](docs/screenshots/overlay-alert.png) | ![Avatars overlay](docs/screenshots/overlay-avatars.png) |
+| **Alert templates** | **Overlay URLs** |
+| ![Alert templates](docs/screenshots/templates.png) | ![Overlay URLs](docs/screenshots/overlay.png) |
+| **Giveaway and trivia** | |
+| ![Giveaway and trivia](docs/screenshots/giveaway.png) | |
+
 ## Get it
 
 ### Desktop app
