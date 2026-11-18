@@ -27,7 +27,7 @@ cd server && npm run typecheck                  # tsc --noEmit
 cd dashboard && npm run build                    # tsc -b && vite build (also the way to type-check the UI)
 
 # Desktop app (from desktop/)
-cd desktop && npm install && npm start          # dev: bundle + run Electron (SA_DATA_DIR=<dir> to use a scratch data folder)
+cd desktop && npm install && npm start          # dev: bundle + run Electron (DYSKSTREAM_DATA_DIR=<dir> to use a scratch data folder)
 cd desktop && npm run dist:mac                   # installer → desktop/release/ (dist:win for Windows NSIS)
 
 # Production (single port 4300; server serves dashboard/dist at /)
@@ -62,7 +62,7 @@ Step 4's guard is the last line of defense against a command string existing in 
 
 **Spending rules live in one place.** `CommandsEngine.redeemTemplate()` and `RewardsEngine.claimReward()` hold all cost/cooldown/moderation logic and know nothing about chat. Any future caller (e.g. a web spending path) must go through them so paths cannot diverge. Do not reimplement these checks in a route.
 
-**Dashboard i18n** (`dashboard/src/i18n.tsx`): lightweight "Indonesian string is the key" system. `LangProvider` (in `main.tsx`) holds `lang` (`id`/`en`, persisted to `localStorage` `sa_lang`); components call `const { t } = useLang()` and wrap visible strings with `t("...")`. Each file registers its own English map at module top via `registerDict({...})` (co-located — no central dictionary). `t(key, params?)` does `{name}`-style substitution. The header has an ID/EN toggle that re-renders live.
+**Dashboard i18n** (`dashboard/src/i18n.tsx`): lightweight "Indonesian string is the key" system. `LangProvider` (in `main.tsx`) holds `lang` (`id`/`en`, persisted to `localStorage` `dyskstream_lang`); components call `const { t } = useLang()` and wrap visible strings with `t("...")`. Each file registers its own English map at module top via `registerDict({...})` (co-located — no central dictionary). `t(key, params?)` does `{name}`-style substitution. The header has an ID/EN toggle that re-renders live.
 
 ## Repo-specific gotchas (these have bitten before)
 

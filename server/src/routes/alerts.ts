@@ -69,7 +69,7 @@ export function alertRoutes(
 
   // Export seluruh riwayat alert ke JSON.
   app.get("/api/redemptions/export", async () => ({
-    app: "streaming-assistant",
+    app: "dyskstream",
     kind: "alert-history",
     version: 1,
     exportedAt: Date.now(),

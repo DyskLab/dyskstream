@@ -31,9 +31,9 @@ interface LangCtx {
 
 const Ctx = createContext<LangCtx | null>(null);
 
-const STORAGE_KEY = "sa_lang";
+const STORAGE_KEY = "dyskstream_lang";
 function initialLang(): Lang {
-  const v = localStorage.getItem(STORAGE_KEY);
+  const v = localStorage.getItem(STORAGE_KEY) ?? localStorage.getItem("sa_lang"); // kunci lama sebelum ganti nama
   return v === "en" || v === "id" ? v : "id";
 }
 

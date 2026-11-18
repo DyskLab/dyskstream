@@ -64,7 +64,7 @@
       if (d.getTime() <= Date.now()) d.setDate(d.getDate() + 1); // sudah lewat → besok
       target = d.getTime();
     } else if (mins && Number(mins) > 0) {
-      const key = "sa_scene_cd_" + body.dataset.scene + "_" + mins;
+      const key = "dyskstream_scene_cd_" + body.dataset.scene + "_" + mins;
       const saved = Number(sessionStorage.getItem(key));
       if (saved && saved > Date.now()) {
         target = saved;

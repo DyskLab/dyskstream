@@ -35,6 +35,7 @@ export function Login({ onSuccess, notice }: { onSuccess: () => void; notice?: s
   return (
     <div className="min-h-screen grid place-items-center p-4">
       <div className="neo-lg bg-white p-6 w-full max-w-sm">
+        <img src="/favicon.svg" alt="" width={56} height={56} className="mb-4" style={{ borderRadius: 13 }} />
         <div
           className="text-2xl font-black uppercase px-3 py-1 mb-5 inline-block"
           style={{ background: "var(--pink)", border: "3px solid #000", boxShadow: "4px 4px 0 #000" }}

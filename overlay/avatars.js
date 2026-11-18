@@ -69,7 +69,8 @@
   const store = {
     get(k) {
       try {
-        return localStorage.getItem(k);
+        // kunci lama "sa_…" (sebelum ganti nama dari Streaming Assistant) tetap dibaca
+        return localStorage.getItem(k) ?? localStorage.getItem(k.replace(/^dyskstream_/, "sa_"));
       } catch {
         return null;
       }
@@ -217,7 +218,7 @@
 
   /** Tipe karakter: pilihan penonton (!karakter) > param ?type= (campur = acak per penonton). */
   function kindFor(id, h) {
-    const saved = store.get("sa_av_kind_" + id);
+    const saved = store.get("dyskstream_av_kind_" + id);
     if (saved === "blob" || saved === "kotak") return saved;
     if (CFG.type === "campur") return (h >>> 9) % 2 ? "kotak" : "blob";
     return CFG.type;
@@ -292,7 +293,7 @@
       nextBlink: performance.now() + rand(1000, 4000),
     };
     av.kind = kindFor(id, h);
-    const saved = store.get("sa_av_color_" + id);
+    const saved = store.get("dyskstream_av_color_" + id);
     av.el.style.setProperty("--c", saved || BASE_COLORS[h % BASE_COLORS.length]);
     updateTag(av, m); // role null → "" memicu render pertama
     stage.appendChild(el);
@@ -370,7 +371,7 @@
       return;
     }
     av.el.style.setProperty("--c", c);
-    store.set("sa_av_color_" + av.id, c);
+    store.set("dyskstream_av_color_" + av.id, c);
     jump(av, 0.7);
   }
 
@@ -382,7 +383,7 @@
       return;
     }
     av.kind = k;
-    store.set("sa_av_kind_" + av.id, k);
+    store.set("dyskstream_av_kind_" + av.id, k);
     render(av);
     jump(av, 0.8);
   }

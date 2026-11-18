@@ -28,10 +28,10 @@ let settings: DesktopSettings;
 const appRoot = app.getAppPath(); // desktop/ saat dev, .../app.asar saat dipaket
 const resDir = app.isPackaged ? process.resourcesPath : join(appRoot, "..");
 const assetDir = app.isPackaged ? join(process.resourcesPath, "assets") : join(appRoot, "assets");
-// SA_DATA_DIR: folder data alternatif (uji coba / mode portable).
+// DYSKSTREAM_DATA_DIR (atau SA_DATA_DIR lama): folder data alternatif (uji coba / mode portable).
 // Instalasi dari sebelum ganti nama (Streaming Assistant) tetap memakai folder datanya yang lama.
 const legacyDataDir = join(app.getPath("appData"), "Streaming Assistant");
-const dataDir = process.env.SA_DATA_DIR || (existsSync(legacyDataDir) ? legacyDataDir : app.getPath("userData"));
+const dataDir = process.env.DYSKSTREAM_DATA_DIR || process.env.SA_DATA_DIR || (existsSync(legacyDataDir) ? legacyDataDir : app.getPath("userData"));
 
 const paths = {
   overlay: join(resDir, "overlay"),

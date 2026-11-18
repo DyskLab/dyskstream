@@ -70,7 +70,7 @@ export function configRoutes(
       enabled: r.enabled,
       alert: r.alert,
     }));
-    return { app: "streaming-assistant", version: 2, settings: deps.settings.getAll(), templates, rewards };
+    return { app: "dyskstream", version: 2, settings: deps.settings.getAll(), templates, rewards };
   });
 
   app.post("/api/config/import", async (req, reply) => {

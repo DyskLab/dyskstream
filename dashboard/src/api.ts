@@ -27,13 +27,19 @@ export interface TemplateBody {
 }
 
 // ---- Token sesi ----
-let token = localStorage.getItem("sa_token") ?? "";
+// Kunci lama "sa_token" (sebelum ganti nama dari Streaming Assistant) dibaca sekali supaya tidak perlu login ulang.
+const TOKEN_KEY = "dyskstream_token";
+let token = localStorage.getItem(TOKEN_KEY) ?? localStorage.getItem("sa_token") ?? "";
+if (localStorage.getItem("sa_token") !== null) {
+  if (token) localStorage.setItem(TOKEN_KEY, token);
+  localStorage.removeItem("sa_token");
+}
 let onUnauth: () => void = () => {};
 
 export function setToken(t: string): void {
   token = t;
-  if (t) localStorage.setItem("sa_token", t);
-  else localStorage.removeItem("sa_token");
+  if (t) localStorage.setItem(TOKEN_KEY, t);
+  else localStorage.removeItem(TOKEN_KEY);
 }
 export function getToken(): string {
   return token;
